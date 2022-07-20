@@ -4,9 +4,8 @@ module async_counter (
     input clk, inp, rst;
     output [3:0] out;
 
-    wire imme1, imme;
-    debounce button (.clk(clk), .inp(inp), .out(imme), .rst(rst));
-    posedge_detector posedge_det (.clk(clk), .inp(imme), .out(imme), .reset(rst));
+    wire imme;
+    debounce db_but (.clk(clk), .inp(inp), .out(imme), .rst(rst));
     always @ (posedge clk or posedge rst) begin
         if (rst) begin
             out <= 0;
