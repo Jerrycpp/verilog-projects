@@ -77,7 +77,7 @@ module led_fsm (clk, inp, out, rst);
         if (rst) counter <= 0;
         else begin
             if (counter == CYCLE - 1) counter <= 0;
-            counter <= counter + 1;
+            else counter <= counter + 1;
         end
     end
 
