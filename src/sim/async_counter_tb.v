@@ -3,28 +3,37 @@ module async_counter_tb;
     reg clk, rst;
     reg inp;
     wire [3:0] out;
-    integer i;
+    //wire deb1, deb2;
+    integer i, j;
     
-    async_counter UUT (.clk(clk), .rst(rst), .inp(inp), .out(out));
+    async_counter UUT (.clk(clk), .rst(rst), .inp(inp), .out(out)
+    //,.debug_out1(deb1), .debug_out2(deb2)
+    );
     
     always #20 clk=~clk;
     initial
         begin
             clk <= 0;
             rst <= 0;
+            
             inp <= 0;
             rst <= 1;
+            #20;
             rst <= 0;
-            for (i = 0; i < 5; i = i+1) begin
+            for (j = 0; j < 3;j = j+1) begin
+                for (i = 0; i < 10; i = i+1) begin
                 #5;
                 inp <= ~inp;
             end
             #5;
             inp <= 1;
-            #100;
-            for (i = 0; i < 5; i = i+1) begin
+            #500;
+            for (i = 0; i < 10; i = i+1) begin
                 #5;
                 inp <= ~inp;
+            end
+            inp <= 0;
+            #100;
             end
         end
 
