@@ -6,8 +6,8 @@ module async_counter (
     output reg [3:0] out;
     //output debug_out1, debug_out2;
     wire imme, imme1;
-    debounce db_but (.clk(clk), .inp(inp), .out(imme), .rst(rst));
-    posedge_detector pos_but (.clk(clk), .inp(imme), .out(imme1), .rst(rst));
+    debounce #(.BOUNCING_TIME(1250000)) db_but (.clk(clk), .inp(inp), .out(imme), .rst(rst));
+    posedge_detector posedge_detect (.clk(clk), .inp(imme), .out(imme1), .rst(rst));
 //    assign debug_out1 = imme;
 //    assign debug_out2 = imme1;
     always @ (posedge clk or posedge rst) begin

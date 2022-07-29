@@ -10,7 +10,7 @@ module async_counter_tb;
     //,.debug_out1(deb1), .debug_out2(deb2)
     );
     
-    always #20 clk=~clk;
+    always #5 clk=~clk;
     initial
         begin
             clk <= 0;
@@ -18,22 +18,22 @@ module async_counter_tb;
             
             inp <= 0;
             rst <= 1;
-            #20;
+            #2;
             rst <= 0;
             for (j = 0; j < 3;j = j+1) begin
                 for (i = 0; i < 10; i = i+1) begin
-                #5;
+                #20;
                 inp <= ~inp;
             end
-            #5;
+            #20;
             inp <= 1;
             #500;
             for (i = 0; i < 10; i = i+1) begin
-                #5;
+                #20;
                 inp <= ~inp;
             end
             inp <= 0;
-            #100;
+            #20;
             end
         end
 
