@@ -14,6 +14,7 @@ module i2cwave_binary (inp, clk, out, rst);
             else if (sampling == 0 && out == 1) begin
                 out <= 0;
             end
+            sampling <= {sampling[24:0], inp};
         end
     end
 endmodule
