@@ -8,10 +8,10 @@ module i2cwave_binary (inp, clk, out, rst);
             sampling <= {26{inp}};
         end
         else begin
-            if (sampling == {26{1}} && out == 0) begin
+            if (sampling == {26{1}}) begin
                 out <= 1;
             end
-            else if (sampling == 0 && out == 1) begin
+            else if (sampling == 0) begin
                 out <= 0;
             end
             sampling <= {sampling[24:0], inp};

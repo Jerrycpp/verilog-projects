@@ -11,7 +11,7 @@ module i2c_fsm (
     reg [4:0] counter;
     wire start, stop;
     localparam IDLE = 0, START = 2'd1, READ = 2'd2, WRITE = 2'd3;
-    edge_detector start_stop_detect (.clk(clk), .sda(sda), .posedge_out(stop), .negedge_out(start), .rst(rst));
+    edge_detector start_stop_detect (.clk(clk), .inp(sda), .posedge_out(stop), .negedge_out(start), .rst(rst));
     always @ (posedge clk or posedge rst) begin
         if (rst) begin
             state <= IDLE;
@@ -19,7 +19,7 @@ module i2c_fsm (
             address <= 7'b0000000;
             data <= 8'b00000000;
             rdy <= 0;
-            counter <= 4'0000;
+            counter <= 4'b0000;
         end
         else begin
             state <= next_state;
@@ -61,7 +61,7 @@ module i2c_fsm (
         if (state == START) begin
             if (counter < 4'd7) begin
                 if (scl == 1 && rdy == 1) begin
-                    address <= {address[6:1], inp};
+                    address <= {address[6:1], sda};
                     rdy <= 0;
                     counter <= counter + 1;
                 end 
@@ -72,7 +72,7 @@ module i2c_fsm (
             else if (counter == 4'd7) begin
                 counter <= 4'd0;
                 if (scl == 1 && rdy == 1) begin
-                    rw <= inp;
+                    rw <= sda;
                 end
             end
         end
