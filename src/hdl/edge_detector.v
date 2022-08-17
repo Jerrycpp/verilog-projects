@@ -8,6 +8,6 @@ module edge_detector(
     
     d_ff flop1 (.clk(clk), .inp(inp), .out(out_flop1), .rst(rst));
     
-    assign posedge_out = out_flop1 & (~inp);
-    assign negedge_out = (~out_flop1) & inp;
+    assign posedge_out = (~out_flop1) & inp;
+    assign negedge_out = out_flop1 & (~inp);
 endmodule
