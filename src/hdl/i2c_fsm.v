@@ -60,7 +60,7 @@ module i2c_fsm (
     end
     
 
-    //Wrting mode
+    
     always @ (posedge clk) begin
         case (state):
             START : begin
