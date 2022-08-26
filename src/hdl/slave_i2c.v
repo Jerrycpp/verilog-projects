@@ -4,7 +4,7 @@ module slave_i2c (
     input scl0, clk0, data;
     input [6:0] device_address;
     inout sda;
-
+    wire clk;
 
     reg [7:0] data_out;
     reg sda_en;
@@ -14,6 +14,8 @@ module slave_i2c (
     reg [7:0] addressrw;
     reg [7:0] data_in;
     reg [4:0] counter;
+    reg [2:0] state;
+    reg [2:0] next_state;
     
     assign sda = sda_en ? 0 : 1'bz;
     
