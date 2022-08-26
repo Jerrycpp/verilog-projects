@@ -1,7 +1,8 @@
 module slave_i2c (
     device_address, sda, scl0, clk0, data
 ); 
-    input scl0, clk0, data;
+    input scl0, clk0;
+    input [7:0] data;
     input [6:0] device_address;
     inout sda;
     wire clk;
@@ -136,8 +137,8 @@ module slave_i2c (
             data_out <= 8'b0;
         end
         else begin
-            if (state == ACK) begin
-                data_out <= {data_out[6:0], data};
+            if (state == ACK && scl_rise) begin
+                data_out <= data;
             end
             else if (state == READ) begin
                 if (counter > 9 && scl_fall) data_out <= data_out << 1;
