@@ -9,12 +9,15 @@ module i2c_fsm (
     reg rw;
     reg rdy; // next bit Ready to go?
     reg [4:0] counter;
-    wire start, stop, scl, sda;
+    reg start, stop, sda, scl;
+    wire sda_1, scl_1;
     reg [1:0] ack;
+   
     localparam IDLE = 0, START = 2'd1, READ = 2'd2, WRITE = 2'd3;
-    i2cwave_binary sclwave (.clk(clk), .rst(rst), .inp(scl0), .out(scl));
-    i2cwave_binary sdawave (.clk(clk), .rst(rst), .inp(sda0), .out(sda));
+    i2cwave_binary sclwave (.clk(clk), .rst(rst), .inp(scl0), .out(scl_1));
+    i2cwave_binary sdawave (.clk(clk), .rst(rst), .inp(sda0), .out(sda_1));
     edge_detector start_stop_detect (.clk(clk), .inp(sda), .posedge_out(stop), .negedge_out(start), .rst(rst));
+    assign sda = sda_1;
     always @ (posedge clk or posedge rst) begin
         if (rst) begin
             state <= IDLE;
@@ -62,7 +65,7 @@ module i2c_fsm (
 
     
     always @ (posedge clk) begin
-        case (state):
+        case (state)
             START : begin
                 if (counter < 4'd7) begin
                 if (scl == 1 && rdy == 1) begin
