@@ -5,6 +5,8 @@ module slave_i2c (
     input [6:0] device_address;
     inout sda;
 
+
+    reg [7:0] data_out;
     reg sda_en;
     reg sda_out;
     wire sda_in;
@@ -13,7 +15,7 @@ module slave_i2c (
     reg [7:0] data_in;
     reg [4:0] counter;
     
-    assign sda = sda_en ? sda_out : 1'bz;
+    assign sda = sda_en ? 0 : 1'bz;
     
     localparam IDLE = 3'd0, START = 3'd1, READ = 3'd2, WRITE = 3'd3, ACK = 3'd4;
     localparam ADDRESSRW_READ = 5'd8, ACK1 = 5'd9, DATA = 5'd17, NACK2 = 5'd18;
@@ -100,26 +102,19 @@ module slave_i2c (
     always @ (posedge clk or posedge rst) begin
         if (rst) sda_en <= 0;
         else begin
-            if (scl_fall && (state == ACK)) begin
+            if (scl_fall && state == ACK) begin
                 sda_en <= 1;
             end
-            else if (scl_fall && (state != ACK)) begin
+            else if (state == READ && scl_fall) begin
+                sda_en <= ~(data_out[7]);
+            end
+            else if (scl_fall && (state != ACK && state != READ)) begin
                 sda_en <= 0;
             end
         end
     end
 
-    always @ (posedge clk or posedge rst) begin
-        if (rst) begin
-            sda_out <= 1;
-        end
-        else begin
-            if (state == ACK) begin
-                sda_out <= 0;
-            end
-        end
-    end
-
+    
     //WRITE
     always @ (posedge clk or posedge rst) begin
         if (rst) begin
@@ -131,10 +126,21 @@ module slave_i2c (
             end
         end
     end
-    //READ
+    
+
+    // DATA_OUT
     always @ (posedge clk or posedge rst) begin
         if (rst) begin
-
+            data_out <= 8'b0;
+        end
+        else begin
+            if (state == ACK) begin
+                data_out <= {data_out[6:0], data};
+            end
+            else if (state == READ) begin
+                if (counter > 9 && scl_fall) data_out <= data_out << 1;
+            end
         end
     end
+    
 endmodule
