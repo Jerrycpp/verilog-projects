@@ -1,5 +1,5 @@
 module slave_i2c (
-    device_address, sda, scl0, clk, data
+    device_address, sda, scl0, clk0, data
 ); 
     input scl0, clk0, data;
     input [6:0] device_address;
