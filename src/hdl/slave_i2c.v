@@ -140,8 +140,8 @@ module slave_i2c (
             if (state == ACK && scl_rise) begin
                 data_out <= data;
             end
-            else if (state == READ) begin
-                if (counter > 9 && scl_fall) data_out <= data_out << 1;
+            else if (state == READ && scl_fall) begin
+                data_out <= data_out << 1;
             end
         end
     end
