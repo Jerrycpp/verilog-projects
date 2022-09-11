@@ -8,7 +8,7 @@ module dar (clk, rst, data_in, data_out, w_en, r_en, addr);
 
     always @ (posedge clk or posedge rst) begin
         if (rst) begin
-            for (i = 0 ; i < 128 ; i = i+1) begin
+            for (i = 0 ; i < 4 ; i = i+1) begin
                 regs[i] <= 8'b0;
             end
         end
@@ -16,12 +16,10 @@ module dar (clk, rst, data_in, data_out, w_en, r_en, addr);
             if (w_en) begin
                 regs[addr] <= data_in;
             end
-            else if (r_en) begin
-                data_out <= regs[addr];
-            end
         end
     end
 
+    assign data_out = r_en ? regs[addr] : 0;
 
 
 endmodule
