@@ -19,7 +19,7 @@ module dar (clk, rst, data_in, data_out, w_en, r_en, addr);
         end
     end
 
-    assign data_out = r_en ? regs[addr] : 0;
+    assign data_out = r_en ? regs[addr] : 8'b0;
 
 
 endmodule
