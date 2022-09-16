@@ -2,7 +2,6 @@ module slave_i2c (
     device_address, sda, scl0, clk0, data
 ); 
     input scl0, clk0;
-    input [7:0] data;
     input [6:0] device_address;
     inout sda;
     wire clk;
@@ -12,12 +11,14 @@ module slave_i2c (
     reg sda_out;
     wire sda_in;
     wire scl_rise, scl_fall;
+    input [7:0] data;
+    reg [6:0] addr;
     reg [7:0] addressrw;
     reg [7:0] data_in;
+    reg [7:0] data_in_0;
     reg [4:0] counter;
     reg [2:0] state;
     reg [2:0] next_state;
-    
     assign sda = sda_en ? 0 : 1'bz;
     
     localparam IDLE = 3'd0, START = 3'd1, READ = 3'd2, WRITE = 3'd3, ACK = 3'd4;
@@ -26,6 +27,7 @@ module slave_i2c (
     i2cwave_binary sdawave (.clk(clk), .rst(rst), .inp(sda), .out(sda_in));
     edge_detector start_stop_detect (.clk(clk), .inp(sda), .posedge_out(stop), .negedge_out(start), .rst(rst));
     edge_detector rising_scl (.clk(clk), .inp(scl), .posedge_out(scl_rise), .negedge_out(scl_fall), .rst(rst));
+    dar i2c_mem (.clk(clk), .rst(rst), .data_in(data_in_0), .data_out(data), .addr(addr), .w_en(1), .r_en(1));
     always @ (posedge clk or posedge rst) begin
         if (rst) begin
             state <= IDLE;
@@ -77,6 +79,7 @@ module slave_i2c (
         endcase
     end
     
+    // counter (saving the number of bits from the first bit)
     always @ (posedge clk or posedge rst) begin
         if (rst) begin
             counter <= 5'b00000;
@@ -91,6 +94,7 @@ module slave_i2c (
         end
     end
 
+    // get addressrw (the first 8 bit after start)
     always @ (posedge clk or posedge rst) begin
         if (rst) begin
             addressrw <= 8'b0;
@@ -102,6 +106,8 @@ module slave_i2c (
         end
     end
 
+
+    // sda_en for ACK and NACK
     always @ (posedge clk or posedge rst) begin
         if (rst) sda_en <= 0;
         else begin
@@ -117,6 +123,7 @@ module slave_i2c (
         end
     end
 
+    
     
     //WRITE
     always @ (posedge clk or posedge rst) begin
@@ -146,4 +153,15 @@ module slave_i2c (
         end
     end
     
+    // handle data_in
+    always @ (posedge clk or posedge rst) begin
+        if (rst) begin
+            addr <= 7'b0;
+        end
+        else begin
+            if (data_in[7] == 0) begin
+                addr <= data_in[6:0];
+            end
+        end
+    end
 endmodule
