@@ -1,13 +1,13 @@
-module dar (clk, rst, data_in, data_out, w_en, r_en, addr);
-    input clk, rst, w_en, r_en;
+module dar (clk, rst_n, data_in, data_out, w_en, r_en, addr);
+    input clk, rst_n, w_en, r_en;
     input [7:0] data_in;
     input [6:0] addr;
     output [7:0] data_out;
     integer i;
     reg [7:0] regs [127:0];
 
-    always @ (posedge clk or posedge rst) begin
-        if (rst) begin
+    always @ (posedge clk or negedge rst_n) begin
+        if (~rst_n) begin
             for (i = 0 ; i < 128 ; i = i+1) begin
                 regs[i] <= 8'b0;
             end

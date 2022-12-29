@@ -1,11 +1,10 @@
 module slave_i2c (
-    device_address, sda, scl0, clk0, data
+    sda, scl0, clk0, data, rst_n, device_address
 ); 
-    input scl0, clk0;
+    input scl0, clk0, rst_n;
     input [6:0] device_address;
     inout sda;
     wire clk;
-
     reg [7:0] data_out;
     reg sda_en;
     reg sda_out;
@@ -23,13 +22,13 @@ module slave_i2c (
     
     localparam IDLE = 3'd0, START = 3'd1, READ = 3'd2, WRITE = 3'd3, ACK = 3'd4;
     localparam ADDRESSRW_READ = 5'd8, ACK1 = 5'd9, DATA = 5'd17, NACK2 = 5'd18;
-    i2cwave_binary sclwave (.clk(clk), .rst(rst), .inp(scl0), .out(scl));
-    i2cwave_binary sdawave (.clk(clk), .rst(rst), .inp(sda), .out(sda_in));
-    edge_detector start_stop_detect (.clk(clk), .inp(sda), .posedge_out(stop), .negedge_out(start), .rst(rst));
-    edge_detector rising_scl (.clk(clk), .inp(scl), .posedge_out(scl_rise), .negedge_out(scl_fall), .rst(rst));
-    dar i2c_mem (.clk(clk), .rst(rst), .data_in(data_in_0), .data_out(data), .addr(addr), .w_en(1), .r_en(1));
-    always @ (posedge clk or posedge rst) begin
-        if (rst) begin
+    i2cwave_binary sclwave (.clk(clk), .rst_n(rst_n), .inp(scl0), .out(scl));
+    i2cwave_binary sdawave (.clk(clk), .rst_n(rst_n), .inp(sda), .out(sda_in));
+    edge_detector start_stop_detect (.clk(clk), .inp(sda), .posedge_out(stop), .negedge_out(start), .rst_n(rst_n));
+    edge_detector rising_scl (.clk(clk), .inp(scl), .posedge_out(scl_rise), .negedge_out(scl_fall), .rst_n(rst_n));
+    dar i2c_mem (.clk(clk), .rst_n(rst_n), .data_in(data_in_0), .data_out(data), .addr(addr), .w_en(1), .r_en(1));
+    always @ (posedge clk or negedge rst_n) begin
+        if (~rst_n) begin
             state <= IDLE;
         end
         else begin
@@ -80,8 +79,8 @@ module slave_i2c (
     end
     
     // counter (saving the number of bits from the first bit)
-    always @ (posedge clk or posedge rst) begin
-        if (rst) begin
+    always @ (posedge clk or negedge rst_n) begin
+        if (~rst_n) begin
             counter <= 5'b00000;
         end
         else begin
@@ -95,8 +94,8 @@ module slave_i2c (
     end
 
     // get addressrw (the first 8 bit after start)
-    always @ (posedge clk or posedge rst) begin
-        if (rst) begin
+    always @ (posedge clk or negedge rst_n) begin
+        if (~rst_n) begin
             addressrw <= 8'b0;
         end
         else begin
@@ -108,8 +107,8 @@ module slave_i2c (
 
 
     // sda_en for ACK and NACK
-    always @ (posedge clk or posedge rst) begin
-        if (rst) sda_en <= 0;
+    always @ (posedge clk or negedge rst_n) begin
+        if (~rst_n) sda_en <= 0;
         else begin
             if (scl_fall && state == ACK) begin
                 sda_en <= 1;
@@ -126,8 +125,8 @@ module slave_i2c (
     
     
     //WRITE
-    always @ (posedge clk or posedge rst) begin
-        if (rst) begin
+    always @ (posedge clk or negedge rst_n) begin
+        if (~rst_n) begin
             data_in <= 8'b0;
         end
         else begin
@@ -139,8 +138,8 @@ module slave_i2c (
     
 
     // DATA_OUT
-    always @ (posedge clk or posedge rst) begin
-        if (rst) begin
+    always @ (posedge clk or negedge rst_n) begin
+        if (~rst_n) begin
             data_out <= 8'b0;
         end
         else begin
@@ -154,8 +153,8 @@ module slave_i2c (
     end
     
     // handle data_in
-    always @ (posedge clk or posedge rst) begin
-        if (rst) begin
+    always @ (posedge clk or negedge rst_n) begin
+        if (~rst_n) begin
             addr <= 7'b0;
         end
         else begin
